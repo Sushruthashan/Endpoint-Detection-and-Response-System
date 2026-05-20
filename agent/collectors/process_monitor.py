@@ -1,15 +1,20 @@
 import psutil
 import time
 from datetime import datetime
+
 from agent.sender import send_event
 from agent.config import HOSTNAME, AGENT_ID
 
 seen = set()
 
 def monitor_processes():
+
     while True:
-        for proc in psutil.process_iter(['pid','name']):
+
+        for proc in psutil.process_iter(['pid', 'name']):
+
             if proc.info['pid'] not in seen:
+
                 seen.add(proc.info['pid'])
 
                 event = {
@@ -18,13 +23,16 @@ def monitor_processes():
                     "agent_id": AGENT_ID,
                     "event_type": "process",
                     "process_name": proc.info['name'],
-                    "pid": proc.info['pid']
+                    "pid": proc.info['pid'],
+                    "cmdline": " ".join(proc.cmdline())
                 }
+
+                print(f"[+] Process: {event['process_name']}")
 
                 send_event(event)
 
-        time.sleep(0.01)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
-    monitor()
+    monitor_processes()
